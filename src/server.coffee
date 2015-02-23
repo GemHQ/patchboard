@@ -3,25 +3,27 @@ connect = require "connect"
 SimpleDispatcher = require("./dispatchers/simple")
 
 module.exports = class Server
-  constructor: (api, @options) ->
-    {@host, @port, @cert, @key, @timeout} = @options
+  constructor: (@listener, @options) ->
+    {@host, @port, @cert, @key, @timeout, @tcp_backlog} = @options
     @host ||= "127.0.0.1"
-    @service = new Service api, @options
-
-    dispatcher = new SimpleDispatcher(@service, options.handlers)
 
     @connect = connect()
-
+    # Limit is deprecated. If we keep patchboard, we need to
+    # Upgrade to a modern version of connect and use body-parser
+    # (which has proven a difficult task)
+    @connect.use connect.limit('1mb')
     @connect.use connect.compress()
     @connect.use middleware.request_encoding()
     @connect.use middleware.json()
-    @connect.use dispatcher.request_listener()
+    @connect.use @listener
 
   run: ->
     @server = @_create()
     if @timeout
       @server.timeout = @timeout
-    @server.listen(@port, @host, @options.tcp_backlog)
+
+    # http://nodejs.org/api/http.html#http_server_listen_port_hostname_backlog_callback
+    @server.listen(@port, @host, @tcp_backlog)
     @service.log.info "HTTP server listening on #{@protocol}://#{@host}:#{@port}"
 
   _create: ->
@@ -34,5 +36,3 @@ module.exports = class Server
     else
       @protocol = "http"
       @server = require("http").createServer(@connect)
-
-
