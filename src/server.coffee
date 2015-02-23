@@ -8,7 +8,10 @@ module.exports = class Server
     @host ||= "127.0.0.1"
 
     @connect = connect()
-
+    # Limit is deprecated. If we keep patchboard, we need to
+    # Upgrade to a modern version of connect and use body-parser
+    # (which has proven a difficult task)
+    @connect.use connect.limit('1mb')
     @connect.use connect.compress()
     @connect.use middleware.request_encoding()
     @connect.use middleware.json()
@@ -33,5 +36,3 @@ module.exports = class Server
     else
       @protocol = "http"
       @server = require("http").createServer(@connect)
-
-
