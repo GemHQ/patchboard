@@ -4,6 +4,27 @@ json_regex = /\+json$/
 
 module.exports =
 
+  # Adapted from the extremely deprecated limit plugin that comes with ancient Connect.
+  limit: (bytes) ->
+    if 'string' == typeof bytes
+      bytes = utils.parseBytes(bytes);
+    if 'number' != typeof bytes
+      throw new Error('limit() bytes required');
+
+    (req, res, next) ->
+      len = if req.headers['content-length'] then parseInt(req.headers['content-length'], 10) else null;
+
+      if (req._limit)
+        return next();
+      req._limit = true;
+
+      if len and len > bytes
+        res.statusCode = 413
+        res.end()
+        return next(utils.error(413))
+      else
+        return next()
+
   request_encoding: (options) ->
     (request, response, next) ->
       encoding = request.headers["content-encoding"]
@@ -68,7 +89,3 @@ module.exports =
         request.on "end", ->
           string = Buffer.concat(buffers).toString()
           parse_json(string)
-
-
-
-

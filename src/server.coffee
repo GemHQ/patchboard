@@ -11,11 +11,12 @@ module.exports = class Server
     # Limit is deprecated. If we keep patchboard, we need to
     # Upgrade to a modern version of connect and use body-parser
     # (which has proven a difficult task)
-    @connect.use connect.limit('1mb')
-    @connect.use connect.compress()
-    @connect.use middleware.request_encoding()
-    @connect.use middleware.json()
-    @connect.use @listener
+    @connect
+      .use(middleware.limit('250kb'))
+      .use(connect.compress())
+      .use(middleware.request_encoding())
+      .use(middleware.json())
+      .use(@listener)
 
   run: ->
     @server = @_create()
