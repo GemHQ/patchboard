@@ -28,7 +28,11 @@ class Path
   match: (path) ->
     # TODO: uri escaping, if not handled by node http lib
 
+    # remove trailing slash
+    if path.slice(-1) == "/"
+      path = path.slice(0,-1)
     path_parts = path.slice(1).split("/")
+
     if path_parts.length == @pattern.length
       captured = {}
       for got, index in path_parts
