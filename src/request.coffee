@@ -48,6 +48,7 @@ module.exports = class Request
     @method = @raw.method
     @headers = @raw.headers
     @body =  @raw.body
+    @esid = @raw.esid
     auth_string = @headers["Authorization"] || @headers["authorization"]
     if auth_string?
       try
@@ -57,4 +58,3 @@ module.exports = class Request
 
     @content_type = @headers["content-type"] || @headers["Content-Type"]
     @accept =  @headers["accept"] || @headers["Accept"]
-
